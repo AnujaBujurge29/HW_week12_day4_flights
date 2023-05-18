@@ -7,11 +7,14 @@
 // The goal of this lab is to add the ability to specify the airport that the flight is originating from;
 // and a list (array) of destinations for the flight.
 // ================================================= Solution ===========================
+
 // Add dotenv
 require("dotenv").config();
+
 // Imports or Dependencies
 const express = require("express");
 const app = express();
+
 // Mongoose info
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
@@ -31,18 +34,46 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "jsx");
 app.engine("jsx", require("jsx-view-engine").createEngine());
-// Data
-const Flight = require("./models/flight");
-// Routes...
-// Index ----------- GET -------- /things
-// New ------------- GET -------- /things/new
-// DELETE ---------- Destroy ---- /things/:id
-// Update ---------- PUT -------- /things/:id
-// Create ---------- POST ------- /things	 
-// Edit------------- GET -------- /things/:id/edit
-// Show ------------ GET -------- /things/:id
 
+// Data
+const Flight = require("./models/flights");
+// Routes...
+app.get('/', (req,res)=>{
+    res.send("<h1>Flight Details</h1>")
+})
+
+// Index ----------- GET -------- /things
+app.get("/flights", (req, res) => {
+  Flight.find({}, (error, allFlights) => {
+    res.render("Index", {
+      flights: allFlights,
+    });
+  });
+});
+// // New ------------- GET -------- /things/new
+app.get("/flights/new", (req, res) => {
+  res.render("../views/New");
+});
+// // DELETE ---------- Destroy ---- /things/:id
+// // Update ---------- PUT -------- /things/:id
+// // Create ---------- POST ------- /things
+app.post('/flights', (req, res)=>{
+    Flight.create(req.body, (error, createdFlight)=>{
+        res.redirect('/flights');
+    });
+  });
+  
+// // Edit------------- GET -------- /things/:id/edit
+// // Show ------------ GET -------- /things/:id
+app.get('/flights/:id', (req, res)=>{
+    Flight.findById(req.params.id, (err, foundFlight)=>{
+        res.render('Show', {
+            flights:foundFlight
+        });
+    });
+  });
+  
 // Listen
 app.listen(process.env.PORT, () => {
-    console.log(`Port: ${process.env.PORT}`);
-  });
+  console.log(`Port: ${process.env.PORT}`);
+});
